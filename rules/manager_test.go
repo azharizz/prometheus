@@ -1578,6 +1578,28 @@ func TestManager_LoadGroups_ShouldCheckWhetherEachRuleHasDependentsAndDependenci
 	})
 }
 
+func TestManager_LoadGroupsWithNilLoggerAndMultipleDocuments(t *testing.T) {
+	ruleFile := filepath.Join(t.TempDir(), "rules.yml")
+	content := []byte(`groups:
+  - name: first
+    rules:
+      - record: test_metric
+        expr: vector(1)
+---
+groups:
+  - name: second
+    rules:
+      - record: ignored_metric
+        expr: vector(1)
+`)
+	require.NoError(t, os.WriteFile(ruleFile, content, 0o600))
+
+	ruleManager := NewManager(&ManagerOptions{})
+	groups, errs := ruleManager.LoadGroups(time.Second, labels.EmptyLabels(), "", nil, false, ruleFile)
+	require.Empty(t, errs)
+	require.Len(t, groups, 1)
+}
+
 func TestDependencyMap(t *testing.T) {
 	ctx := context.Background()
 	opts := &ManagerOptions{

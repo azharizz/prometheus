@@ -167,6 +167,10 @@ func NewManager(o *ManagerOptions) *Manager {
 		o.Parser = parser.NewParser(parser.Options{})
 	}
 
+	if o.Logger == nil {
+		o.Logger = promslog.NewNopLogger()
+	}
+
 	if o.GroupLoader == nil {
 		o.GroupLoader = FileLoader{parser: o.Parser, logger: o.Logger}
 	}
@@ -181,10 +185,6 @@ func NewManager(o *ManagerOptions) *Manager {
 
 	if o.RuleDependencyController == nil {
 		o.RuleDependencyController = ruleDependencyController{}
-	}
-
-	if o.Logger == nil {
-		o.Logger = promslog.NewNopLogger()
 	}
 
 	// Register rule manager features if a registry is provided.
